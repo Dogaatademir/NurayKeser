@@ -6,8 +6,7 @@ import "./Admin.css";
 /* =========================
    DEBUG
 ========================= */
-const DEBUG = true;
-const log = (...a: any[]) => { if (DEBUG) console.log("[ADMIN]", ...a); };
+
 const logErr = (...a: any[]) => console.error("[ADMIN:ERROR]", ...a);
 
 /* =========================

@@ -1,5 +1,5 @@
 // src/components/FeaturedGrid.tsx
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { formatTRY } from "../lib/format";
 import type { ListingRow } from "../lib/api";
 import "./FeaturedGrid.css"; // 👈 CSS'i ekledik
