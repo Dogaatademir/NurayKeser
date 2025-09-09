@@ -246,7 +246,7 @@ const App: React.FC = () => {
             <div className="brand" style={{ marginBottom: 8 }}>
               <span className="brand-logo" aria-hidden="true" />
             </div>
-            <small>© <span>{year}</span> Tüm hakları saklıdır.</small>
+            <small>© <span>{year}</span> Doğa Ata Demir|Tüm hakları saklıdır.</small>
           </div>
           <div>
             <div style={{ color: "#cbd5e1", marginBottom: 8, fontWeight: 600 }}>Bağlantılar</div>
