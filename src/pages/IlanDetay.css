@@ -1,0 +1,352 @@
+
+/* ========== Listing Detail ========== */
+.listing-detail {}
+
+.ld-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  margin: 8px 0 12px;
+}
+
+.ld-bc-sep { opacity: .6; }
+
+/* Başlık: ana görselin 18px üstü */
+.ld-heading {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(22px, 3.6vw, 32px);
+  color: var(--brand);
+  margin: 0 0 18px;
+}
+
+/* ==== Layout ==== */
+.ld-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(320px, .6fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.ld-media {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+}
+
+.ld-media-main {
+  position: relative;
+  width: 100%;
+  max-width: 980px;
+  margin-inline: auto;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.ld-main-image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: contain;
+  object-position: center;
+  background: #fff;
+}
+
+/* Slider okları */
+.ld-prev,
+.ld-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, .55);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform .12s ease, background .2s ease;
+}
+
+.ld-prev:hover,
+.ld-next:hover {
+  transform: translateY(-50%) scale(1.05);
+  background: rgba(0, 0, 0, .7);
+}
+
+.ld-prev { left: 10px; }
+.ld-next { right: 10px; }
+
+.ld-counter {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  background: rgba(0, 0, 0, .65);
+  color: #fff;
+  font-size: .9rem;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .15);
+}
+
+/* Küçük önizlemeler – sabit 4 sütun */
+
+/* ==== THUMBS: 4 sütun, boşluksuz, fotoğraf tam doldurur ==== */
+.ld-thumbs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;              /* daha sıkı */
+  padding: 0;            /* iç boşluğu kaldır */
+}
+
+.ld-thumb {
+  position: relative;
+  overflow: hidden;      /* köşelerden taşmasın */
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: transparent;   /* siyah/beyaz zemin görünmesin */
+  aspect-ratio: 4/3;         /* hepsi aynı yükseklik, dolu görünüm */
+  box-shadow: none;          /* istersen tekrar ekleyebilirsin */
+  cursor: pointer;
+  transition: transform .12s ease, border-color .2s ease;
+}
+
+.ld-thumb:hover { transform: translateY(-1px); border-color: var(--border-strong); }
+
+.ld-thumb img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;     /* görüntü kartı tam kaplasın */
+  object-position: center;
+  max-width: none !important;  /* olası global kısıtları ez */
+  margin: 0 !important;        /* olası global margin’leri ez */
+}
+
+.ld-thumb.is-active {
+  outline: 2px solid var(--brand-2);
+  outline-offset: 2px;
+}
+
+
+
+/* Sağ taraf (Özet + Özellikler) */
+.ld-side {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.ld-price-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: var(--shadow);
+}
+
+.ld-price {
+  font-weight: 800;
+  font-size: 1.3rem;
+  color: var(--brand);
+}
+
+.ld-location {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  color: var(--muted);
+  box-shadow: var(--shadow);
+}
+
+.ld-loc-icon { font-size: 16px; }
+.ld-loc-text { font-size: .95rem; }
+
+.ld-specs {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.ld-specs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .92rem;
+}
+
+.ld-specs-table th,
+.ld-specs-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, .06);
+}
+
+.ld-specs-table th {
+  width: 40%;
+  color: var(--muted);
+  background: rgba(0, 121, 193, .04);
+  text-align: left;
+  font-weight: 600;
+}
+
+.ld-specs-table tr:last-child th,
+.ld-specs-table tr:last-child td {
+  border-bottom: none;
+}
+
+.ld-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Açıklama */
+.ld-desc-card {
+  margin-top: 20px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+
+.ld-desc-title {
+  margin: 0 0 8px;
+  color: var(--brand);
+}
+
+.ld-desc-text { margin: 0; }
+.ld-muted { color: var(--muted); }
+
+/* Kart & iskelet */
+.ld-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.ld-card-body { padding: 18px; }
+.ld-title { margin: 0 0 6px; }
+
+/* ========== Mobile/Tablet Fixes ========== */
+
+/* Tablet ve altı: tek sütun, sağ panel alta insin */
+@media (max-width: 992px) {
+  .ld-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+  .ld-side {
+    margin-top: 8px;   /* medya kartından sonra küçük boşluk */
+  }
+
+  /* Sağ sütunun min-width dayatmasını mobilde kaldır */
+  .ld-grid > * {
+    min-width: 0;
+  }
+
+  /* Ana medya kartı tam genişlik */
+  .ld-media-main {
+    max-width: 100%;
+    margin-inline: 0;
+    border-radius: calc(var(--radius) + 2px);
+  }
+
+  /* Başlık ve fiyat satırı boyutları biraz küçülsün */
+  .ld-heading {
+    font-size: clamp(20px, 5vw, 28px);
+    margin: 0 0 14px; /* ana görselin 14px üstü (dar alanda daha dengeli) */
+  }
+  .ld-price-row { padding: 12px; }
+  .ld-price { font-size: 1.15rem; }
+
+  /* Thumbnail ızgarası: dar ekranda 3 sütuna in, dokunma alanı geniş kalsın */
+  .ld-thumbs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .ld-thumb {
+    border-radius: 8px;
+  }
+
+  /* Slider okları: güvenli alan ve dokunma boyutu */
+  .ld-prev, .ld-next {
+    width: 36px;
+    height: 36px;
+    top: auto;
+    bottom: 10px;
+    transform: none;
+    background: rgba(0,0,0,.55);
+  }
+  .ld-prev { left: max(10px, env(safe-area-inset-left)); }
+  .ld-next { right: max(10px, env(safe-area-inset-right)); }
+
+  /* Sayaç altta kalsın, okunabilirliği koru */
+  .ld-counter {
+    left: auto;
+    right: max(10px, env(safe-area-inset-right));
+    bottom: 10px;
+    font-size: .85rem;
+    padding: 5px 9px;
+  }
+}
+
+/* Çok küçük ekranlar (≤360px): thumb 2 sütun */
+@media (max-width: 360px) {
+  .ld-thumbs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Yatay taşmayı kesin olarak engelle */
+@media (max-width: 992px) {
+  .listing-detail {
+    overflow-x: hidden;
+  }
+}
+/* Okları ana görselin ortasına yerleştir */
+.ld-prev,
+.ld-next {
+  top: 50% !important;
+  bottom: auto !important;
+  transform: translateY(-50%) !important;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, .55);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform .12s ease, background .2s ease;
+  z-index: 2; /* fotoğrafın üstünde kalsın */
+}
+
+.ld-prev { left: 12px; }
+.ld-next { right: 12px; }
+
+.ld-prev:hover,
+.ld-next:hover {
+  transform: translateY(-50%) scale(1.05);
+  background: rgba(0,0,0,.7);
+}

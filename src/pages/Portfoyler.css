@@ -1,0 +1,209 @@
+/* ========== Portföyler Sayfası ========== */
+/* Global palet – projede kullandıklarınla uyumlu */
+:root {
+  --bg: #f8f9fa;
+  --card: #ffffff;
+  --muted: #6b7280;
+  --text: #1f2937;
+
+  --brand: #004b8d;
+  --brand-2: #0079c1;
+  --danger: #dc2626;
+
+  --radius: 18px;
+  /* Yumuşak ama belirgin gölge */
+  --shadow: 0 8px 28px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+  --container: 100%;
+
+  --border: rgba(0, 75, 141, 0.18);
+  --border-strong: rgba(0, 75, 141, 0.36);
+  --hover-bg-soft: rgba(0, 121, 193, 0.08);
+}
+
+/* Sayfa iskeleti */
+.section.page {
+  background: var(--bg);
+  padding: clamp(16px, 2.6vw, 28px) 0;
+  color: var(--text);
+  min-height: 100vh;
+
+  /* 🔑 header için boşluk bırak */
+  padding-top: 80px; /* header yüksekliğine göre ayarla */
+}
+
+.section.page .container {
+  width: min(1200px, 94%);
+  margin-inline: auto;
+}
+
+/* Başlık */
+.ld-heading {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(22px, 3.2vw, 32px);
+  color: var(--brand);
+  margin: 0 0 6px 0; /* İstenirse 18px üst boşluk için: her zaman görselin 18px üstünde */
+}
+
+/* Grid: satıra sığdığı kadar kart */
+.section.page .grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  align-items: stretch;
+}
+
+/* Kart */
+.section.page .card {
+  grid-column: auto / span 1;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;                  /* Görsel taşmalarını engeller */
+  transition: transform .12s ease, border-color .2s ease, box-shadow .2s ease;
+  will-change: transform;
+  background-clip: padding-box;      /* Hover'da border aşılma sorunu olmasın */
+  padding: 0;                        /* İç padding'i body tarafına taşıyoruz */
+}
+
+.section.page .card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  box-shadow: 0 10px 30px rgba(0,0,0,.14);
+}
+
+/* Kart tamamı tıklanabilir */
+.section.page .card > a {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  text-decoration: none;
+  color: inherit;
+  height: 100%;
+}
+
+/* Kapak görseli */
+.section.page .cover {
+  position: relative;
+  aspect-ratio: 16 / 10;      /* Her kartta tutarlı yükseklik */
+  overflow: hidden;
+  background: #eef2f7;
+  border-bottom: 1px solid var(--border);
+}
+
+.section.page .cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;             /* Görsel-bazlı boşlukları kaldırır */
+  transform: scale(1);
+  transition: transform .35s ease;
+}
+
+.section.page .card:hover .cover img {
+  transform: scale(1.03);
+}
+
+/* Tip etiketi */
+.section.page .chip {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  z-index: 2;
+  font-size: 12px;
+  line-height: 1;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(0, 75, 141, 0.1);
+  color: var(--brand);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(4px);
+}
+
+/* Kart içi */
+.section.page .card-body {
+  display: grid;
+  gap: 8px;
+  padding: 14px 14px 16px;
+}
+
+.section.page .card-body .title {
+  margin: 0;
+  font-size: clamp(14px, 1.6vw, 16px);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.section.page .card-body .price {
+  font-size: clamp(14px, 1.8vw, 17px);
+  font-weight: 700;
+  color: var(--brand);
+}
+
+.section.page .card-body .meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.section.page .card-body .meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #fff;
+}
+
+/* Yükleniyor / Boş durum kartları */
+.section.page .card[style*="padding"] {
+  /* Bu seçim, JS'te inline padding verilen uyarı kartlarına da hoş bir görünüm kazandırır */
+  text-align: center;
+  color: var(--muted);
+}
+
+/* Sayfalama */
+.section.page .btn {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  border-radius: 999px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color .2s ease, border-color .2s ease, transform .08s ease;
+}
+
+.section.page .btn:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.section.page .btn:hover:not(:disabled) {
+  background: var(--hover-bg-soft);
+  border-color: var(--border-strong);
+}
+
+.section.page .btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+/* Ghost varyantı */
+.section.page .btn-ghost {
+  background: transparent;
+}
+
+/* Küçük ekran optimizasyonları */
+@media (max-width: 200px) {
+  .section.page .card-body {
+    padding: 12px;
+  }
+  .section.page .chip {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+}

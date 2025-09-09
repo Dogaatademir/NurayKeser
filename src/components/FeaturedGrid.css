@@ -1,0 +1,206 @@
+/* src/components/FeaturedGrid.css */
+
+/* ====== Global Palet ====== */
+:root {
+  --bg: #f8f9fa;
+  --card: #ffffff;
+  --muted: #6b7280;
+  --text: #1f2937;
+
+  --brand: #004b8d;
+  --brand-2: #0079c1;
+  --danger: #dc2626;
+
+  --radius: 18px;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.05);
+  --container: 100%;
+
+  --border: rgba(0, 75, 141, 0.2);
+  --border-strong: rgba(0, 75, 141, 0.6);
+  --hover-bg-soft: rgba(0, 121, 193, 0.08);
+
+  --header-h: 72px;
+
+  --gap: 16px; /* grid boşluğu */
+}
+
+/* ====== Kapsayıcılar ====== */
+.fg-wrap { position: relative; }
+
+/* Yatay kaydırmalı ve snap'li viewport */
+.fg-viewport {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity; /* mandatory yerine proximity daha akıcı */
+  scrollbar-width: thin;
+  padding: 0 var(--gap) 12px; /* sağ-sol boşluk */
+  touch-action: pan-x pinch-zoom;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: none;
+  /* iOS/Safari'de “alt gölge” titremesini azaltır */
+  contain: content;
+}
+
+/* WebKit scrollbar */
+.fg-viewport::-webkit-scrollbar { height: 6px; }
+.fg-viewport::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 8px;
+}
+.fg-viewport::-webkit-scrollbar-track { background: transparent; }
+
+/* Flex track: kartlar tek satırda, kırpılmadan akıyor */
+.fg-track {
+  display: flex;
+  flex-wrap: nowrap;
+  width: 100%;
+  gap: var(--gap);
+  /* iç boşluk sayesinde ilk/son kart kenara yapışmaz */
+  padding: 2px 0;
+}
+
+/* ====== Kart ====== */
+.fg-card {
+  position: relative;
+  /* Varsayılan (desktop ≥960px): 3 sütun */
+  flex: 0 0 calc((100% - (var(--gap) * 2)) / 3);
+  max-width: calc((100% - (var(--gap) * 2)) / 3);
+  min-width: 0;
+  box-sizing: border-box;
+
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  text-decoration: none;
+  color: var(--text);
+  overflow: hidden;
+  /* hover/transform efektlerinde kenarlığın taşmamasını garantiler */
+  contain: paint;
+}
+
+/* Üstte görünen “sanal” kenarlık */
+.fg-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px var(--border);
+  z-index: 1;
+}
+
+/* Hover/Focus (masaüstü) */
+@media (hover: hover) and (pointer: fine) {
+  .fg-card:hover {
+    background: color-mix(in oklab, var(--hover-bg-soft) 100%, transparent);
+    transform: translateY(-1px);
+  }
+}
+
+.fg-card:focus-visible {
+  outline: 3px solid color-mix(in oklab, var(--brand) 70%, transparent);
+  outline-offset: 2px;
+}
+
+/* ====== Medya ====== */
+.fg-media {
+  aspect-ratio: 4 / 3;
+  background: #f1f3f5;
+  display: block;
+  overflow: hidden;
+  position: relative;
+  z-index: 0;
+}
+
+.fg-media > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  z-index: 0;
+  /* Safari'de micro-blur'ı azaltır */
+  transform: translateZ(0);
+}
+
+/* ====== Metin ====== */
+.fg-body {
+  padding: 8px 10px 10px;
+  display: grid;
+  gap: 4px;
+  position: relative;
+  z-index: 0;
+}
+
+.fg-title {
+  margin: 0;
+  font-size: clamp(12px, 2.2vw, 14px);
+  line-height: 1.3;
+  color: var(--brand);
+  display: -webkit-box;           /* tek/çift satır kısaltma */
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.fg-price {
+  font-weight: 600;
+  font-size: clamp(12px, 2.1vw, 13px);
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fg-meta {
+  font-size: clamp(10px, 2vw, 12px);
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ====== Tercihler ====== */
+@media (prefers-reduced-motion: reduce) {
+  .fg-viewport { scroll-behavior: auto; }
+}
+
+/* ====== Breakpoints (tam responsive) ====== */
+
+/* Tablet: 600–959px → 2 sütun */
+@media (min-width: 600px) and (max-width: 959.98px) {
+  .fg-card {
+    flex: 0 0 calc((100% - var(--gap)) / 2);
+    max-width: calc((100% - var(--gap)) / 2);
+  }
+}
+
+/* Telefon: <600px → 1 sütun */
+@media (max-width: 599.98px) {
+  :root { --gap: 14px; } /* mobilde biraz daha sıkı boşluk */
+  .fg-card {
+    /* sağ-sol paddingle birlikte kart kenara yapışmaz */
+    flex: 0 0 calc(100% - var(--gap));
+    max-width: calc(100% - var(--gap));
+    scroll-snap-align: center; /* mobilde daha doğal kilitlenme */
+  }
+  .fg-media { aspect-ratio: 16 / 10; } /* mobilde biraz yatay oran daha iyi doldurur */
+}
+
+/* Büyük ekran: ≥1440px → kartlar daha ferah */
+@media (min-width: 1440px) {
+  :root { --gap: 18px; }
+  .fg-card {
+    flex: 0 0 calc((100% - (var(--gap) * 2)) / 3);
+    max-width: calc((100% - (var(--gap) * 2)) / 3);
+  }
+}
+
+/* Kalın kenarlık/hover taşmaları için “güvenlik ağı” */
+.fg-card, .fg-media { backface-visibility: hidden; }

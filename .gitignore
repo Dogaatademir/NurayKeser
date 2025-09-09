@@ -1,0 +1,12 @@
+# Node / Vite
+node_modules/
+dist/
+dist-ssr/
+
+# Env dosyaları (gizli tut)
+.env
+.env.*
+!.env.example
+
+# macOS
+.DS_Store
