@@ -41,8 +41,8 @@ const Header: React.FC = () => {
 
   const nav = [
     { label: "Ana Sayfa",  href: "#/" },
-    { label: "Portföy", href: "#/portfoyler" },
     { label: "Hakkımda",   href: "#/hakkimda" },
+    { label: "Portföy", href: "#/portfoyler" },
     { label: "Hizmetler",  href: "#servisler", noActive: true }, // asla aktif olmayacak
     { label: "İletişim",   href: "#iletisim",  noActive: true }, // asla aktif olmayacak
   ];

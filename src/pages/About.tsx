@@ -1,6 +1,7 @@
 // src/pages/About.tsx
 import React from "react";
 import Header from "../components/Header";
+import Hero from "../components/Hero"; // ✅ Eklendi
 import "./About.css";
 
 const bullets = [
@@ -15,6 +16,11 @@ const About: React.FC = () => {
       <Header />
 
       <main className="page">
+        {/* HERO — App.tsx ile aynı kullanım */}
+        <section className="section">
+          <Hero />
+        </section>
+
         {/* Özgeçmiş */}
         <section className="section about-section">
           <div className="container">

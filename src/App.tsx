@@ -177,17 +177,17 @@ const App: React.FC = () => {
             <h2 className="title">Hizmetler</h2>
             <div className="services">
               <div className="service">
-                <div className="tag" style={{ width: "max-content" }}>Satış</div>
+                <div className="tag" style={{ width: "max-content" }}></div>
                 <h3>Satış &amp; Değerleme</h3>
                 <p>Karşılaştırmalı pazar analizi ile doğru fiyat, hızlı satış.</p>
               </div>
               <div className="service">
-                <div className="tag" style={{ width: "max-content" }}>Kiralama</div>
+                <div className="tag" style={{ width: "max-content" }}></div>
                 <h3>Kiralama Yönetimi</h3>
                 <p>Kiracı profili doğrulama, sözleşme ve teslim yönetimi.</p>
               </div>
               <div className="service">
-                <div className="tag" style={{ width: "max-content" }}>Yatırım</div>
+                <div className="tag" style={{ width: "max-content" }}></div>
                 <h3>Yatırım Danışmanlığı</h3>
                 <p>Getiri odaklı portföy oluşturma ve bölge analizleri.</p>
               </div>
