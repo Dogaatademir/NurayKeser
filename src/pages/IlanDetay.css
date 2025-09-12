@@ -1,6 +1,5 @@
 
 /* ========== Listing Detail ========== */
-.listing-detail {}
 
 .ld-breadcrumb {
   display: flex;
@@ -349,4 +348,42 @@
 .ld-next:hover {
   transform: translateY(-50%) scale(1.05);
   background: rgba(0,0,0,.7);
+}
+
+/* ========== FAB ========== */
+.fab-wrap {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 60;
+}
+
+.fab {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--brand);
+  color: #fff;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  transition: transform .12s ease, background .2s ease, border-color .2s ease;
+}
+
+.fab:hover {
+  transform: translateY(-1px);
+  background: var(--brand-2);
+  border-color: var(--border-strong);
+}
+
+.fab.phone {
+  background: var(--brand-2);
+}
+
+.fab.phone:hover {
+  background: #0095e0;
 }
