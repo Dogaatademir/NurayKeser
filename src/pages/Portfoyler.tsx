@@ -1,4 +1,3 @@
-// src/pages/Portfoyler.tsx
 import React, { useEffect, useMemo, useState } from "react";
 import { fetchListings } from "../lib/api";
 import type { ListingRow } from "../lib/api";
@@ -32,8 +31,6 @@ const Portfoyler: React.FC = () => {
 
   return (
     <main className="section page">
-     
-
       <div className="container" style={{ display: "grid", gap: 18, maxWidth: 1200 }}>
         <h1 className="ld-heading" style={{ margin: 0 }}>Portföy</h1>
 
@@ -49,7 +46,7 @@ const Portfoyler: React.FC = () => {
               const size = it.sqm_net ? `${it.sqm_net} m²` : it.sqm_brut ? `${it.sqm_brut} m²` : undefined;
               return (
                 <article key={it.id} className="card">
-                  {/* 🔑 BURASI GÜNCELLENDİ: ilan detay linki hash router uyumlu */}
+                  {/* 🔑 İlan detay linki hash router uyumlu */}
                   <a href={`#/ilan/${it.id}`}>
                     <div className="cover">
                       {it.cover_url ? (
@@ -87,6 +84,12 @@ const Portfoyler: React.FC = () => {
             </button>
           </div>
         )}
+      </div>
+
+      {/* ✅ Sabit Aksiyon Butonları */}
+      <div className="fab-wrap">
+        <a className="fab phone" href="tel:+905397445120" title="Hemen Ara">📞</a>
+        <a className="fab" href="https://wa.me/+905397445120" target="_blank" rel="noopener" title="WhatsApp ile yaz">💬</a>
       </div>
     </main>
   );

@@ -1,4 +1,3 @@
-// src/pages/IlanDetay.tsx
 import React, { useEffect, useMemo, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import "./IlanDetay.css";
@@ -330,6 +329,12 @@ const IlanDetay: React.FC<Props> = ({ id }) => {
           </div>
         </div>
       </section>
+
+      {/* ✅ Sabit Aksiyon Butonları */}
+      <div className="fab-wrap">
+        <a className="fab phone" href="tel:+905397445120" title="Hemen Ara">📞</a>
+        <a className="fab" href="https://wa.me/+905397445120" target="_blank" rel="noopener" title="WhatsApp ile yaz">💬</a>
+      </div>
     </main>
   );
 };
