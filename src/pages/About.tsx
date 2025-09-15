@@ -20,7 +20,7 @@ const About: React.FC = () => {
           }
         });
       },
-      { threshold: 0.5, rootMargin: "0px 0px -5% 0px" }
+      { threshold: 0.3, rootMargin: "0px 0px -5% 0px" }
     );
 
     const els = document.querySelectorAll<HTMLElement>(".reveal");
