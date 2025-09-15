@@ -1,5 +1,5 @@
 // src/App.tsx
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import "./App.css";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
@@ -11,6 +11,7 @@ import FeaturedGrid from "./components/FeaturedGrid";
 
 import { fetchListings } from "./lib/api";
 import type { ListingRow } from "./lib/api";
+import { loadFeaturedCache, saveFeaturedCache } from "./lib/cache";
 
 /* Basit hash router */
 function useHashRoute() {
@@ -34,14 +35,13 @@ const App: React.FC = () => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add("active");
-            // bir kez oynatmak için görünen elemanı bırak
             obs.unobserve(entry.target);
           }
         });
       },
       {
-        threshold: 0.3,           // öğenin en az %20'si görünür olduğunda tetiklenir
-        rootMargin: "0px 0px -5% 0px", // alt tarafta hafif erken tetikleme
+        threshold: 0.3,
+        rootMargin: "0px 0px -5% 0px",
       }
     );
 
@@ -51,33 +51,52 @@ const App: React.FC = () => {
     return () => observer.disconnect();
   }, [route]);
 
-  // Ana sayfadaki "Öne Çıkan Portföyler" için Supabase verisi
+  // Çevrimdışı/çevrimiçi durum göstergesi
+  const [online, setOnline] = useState<boolean>(navigator.onLine);
+  useEffect(() => {
+    const on = () => setOnline(true);
+    const off = () => setOnline(false);
+    window.addEventListener("online", on);
+    window.addEventListener("offline", off);
+    return () => {
+      window.removeEventListener("online", on);
+      window.removeEventListener("offline", off);
+    };
+  }, []);
+
+  // Ana sayfadaki "Öne Çıkan Portföyler" için Supabase verisi (+ cache)
   const [featured, setFeatured] = useState<ListingRow[]>([]);
   const [loadingFeatured, setLoadingFeatured] = useState(false);
   const [featuredError, setFeaturedError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const load = async () => {
-      setLoadingFeatured(true);
-      setFeaturedError(null);
-      try {
-        // En yeni 6 öğe
-        const { items } = await fetchListings({
-          page: 1,
-          pageSize: 6,
-          order: "new",
-          type: "All",
-        });
-        setFeatured(items);
-      } catch (e: any) {
-        console.error(e);
-        setFeaturedError(e?.message || String(e));
-      } finally {
-        setLoadingFeatured(false);
-      }
-    };
-    load();
+  const loadFeatured = useCallback(async () => {
+    setLoadingFeatured(true);
+    setFeaturedError(null);
+    try {
+      const { items } = await fetchListings({
+        page: 1,
+        pageSize: 6,
+        order: "new",
+        type: "All",
+      });
+      setFeatured(items);
+      saveFeaturedCache({ items });
+    } catch (e: any) {
+      console.error(e);
+      setFeaturedError(e?.message || String(e));
+    } finally {
+      setLoadingFeatured(false);
+    }
   }, []);
+
+  useEffect(() => {
+    // 1) Son iyi veriyi anında göster
+    const cached = loadFeaturedCache<{ items: ListingRow[] }>();
+    if (cached?.items?.length) setFeatured(cached.items);
+
+    // 2) Arkadan tazele
+    void loadFeatured();
+  }, [loadFeatured]);
 
   const year = useMemo(() => new Date().getFullYear(), []);
 
@@ -166,6 +185,24 @@ const App: React.FC = () => {
   return (
     <>
       <Header />
+
+      {/* Çevrimdışı uyarısı */}
+      {!online && (
+        <div
+          role="status"
+          aria-live="polite"
+          style={{
+            background: "#fef3c7",
+            color: "#78350f",
+            padding: "10px 16px",
+            fontSize: 14,
+            textAlign: "center",
+          }}
+        >
+          Bağlantı kesildi. Yeniden bağlanınca veriler otomatik güncellenecek.
+        </div>
+      )}
+
       <main>
         {/* HERO */}
         <section className="section reveal">
@@ -177,15 +214,26 @@ const App: React.FC = () => {
           <div className="container">
             <h2 className="title">Portföy</h2>
             <p className="subtitle">Seçilmiş konut ve ticari gayrimenkuller.</p>
+
             {loadingFeatured ? (
               <div className="card" style={{ padding: 16 }}>Yükleniyor…</div>
             ) : featuredError ? (
               <div className="card" style={{ padding: 16, color: "#b91c1c" }}>
                 İlanlar yüklenemedi: {featuredError}
+                <div style={{ marginTop: 12 }}>
+                  <button className="btn" onClick={() => void loadFeatured()}>
+                    Tekrar dene
+                  </button>
+                </div>
+              </div>
+            ) : featured.length === 0 ? (
+              <div className="card" style={{ padding: 16 }}>
+                Şu anda gösterilecek ilan bulunamadı.
               </div>
             ) : (
               <FeaturedGrid items={featured} />
             )}
+
             <div style={{ display: "flex", justifyContent: "center", marginTop: 24 }}>
               <a className="btn btn-primary" href="#/portfoyler">Tüm portföyü gör</a>
             </div>
@@ -300,10 +348,10 @@ const App: React.FC = () => {
       </footer>
 
       {/* ✅ Sabit Aksiyon Butonları */}
-        <div className="fab-wrap">
-          <a className="fab phone" href="tel:+905397445120" title="Hemen Ara">📞</a>
-          <a className="fab" href="https://wa.me/+905397445120" target="_blank" rel="noopener" title="WhatsApp ile yaz">💬</a>
-        </div>
+      <div className="fab-wrap">
+        <a className="fab phone" href="tel:+905397445120" title="Hemen Ara">📞</a>
+        <a className="fab" href="https://wa.me/+905397445120" target="_blank" rel="noopener" title="WhatsApp ile yaz">💬</a>
+      </div>
 
       <script
         type="application/ld+json"

@@ -1,7 +1,18 @@
-// src/lib/supabaseClient.ts
+// v2 supabase-js varsayıldı
 import { createClient } from '@supabase/supabase-js';
 
-const url = import.meta.env.VITE_SUPABASE_URL as string;
-const anon = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL!;
+const SUPABASE_ANON = import.meta.env.VITE_SUPABASE_ANON_KEY!;
 
-export const supabase = createClient(url, anon);
+// Tekil (singleton) client ve benzersiz auth storage key
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON, {
+  auth: {
+    persistSession: true,
+    storageKey: 'emlak-site-auth', // projene özel
+    autoRefreshToken: true,
+    detectSessionInUrl: false
+  },
+  global: {
+    headers: { 'x-app': 'emlak-site' },
+  },
+});
