@@ -40,7 +40,7 @@ const App: React.FC = () => {
         });
       },
       {
-        threshold: 0.5,           // öğenin en az %20'si görünür olduğunda tetiklenir
+        threshold: 0.3,           // öğenin en az %20'si görünür olduğunda tetiklenir
         rootMargin: "0px 0px -5% 0px", // alt tarafta hafif erken tetikleme
       }
     );
