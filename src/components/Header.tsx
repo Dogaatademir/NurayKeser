@@ -43,8 +43,8 @@ const Header: React.FC = () => {
     { label: "Ana Sayfa",  href: "#/" },
     { label: "Hakkımda",   href: "#/hakkimda" },
     { label: "Portföy", href: "#/portfoyler" },
-    { label: "Hizmetler",  href: "#servisler", noActive: true }, // asla aktif olmayacak
-    { label: "İletişim",   href: "#iletisim",  noActive: true }, // asla aktif olmayacak
+    { label: "Hizmetler",  href: "#servisler"  }, // asla aktif olmayacak
+    { label: "İletişim",   href: "#iletisim" }, // asla aktif olmayacak
   ];
 
   // Sadece Ana Sayfa / Portföyler / Hakkımda aktif olabilir.

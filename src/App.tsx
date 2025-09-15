@@ -7,11 +7,10 @@ import Admin from "./pages/Admin";
 import About from "./pages/About";
 import Portfoyler from "./pages/Portfoyler";
 import IlanDetay from "./pages/IlanDetay";
-import FeaturedGrid from "./components/FeaturedGrid"; // YENİ: Bileşen import edildi
+import FeaturedGrid from "./components/FeaturedGrid";
 
 import { fetchListings } from "./lib/api";
 import type { ListingRow } from "./lib/api";
-// formatTRY import'u buradan kaldırıldı çünkü artık FeaturedGrid içinde
 
 /* Basit hash router */
 function useHashRoute() {
@@ -25,10 +24,32 @@ function useHashRoute() {
   return route || "/";
 }
 
-// === FeaturedGrid BİLEŞENİ BURADAN KALDIRILDI ===
-
 const App: React.FC = () => {
   const route = useHashRoute();
+
+  // Bölümler görünür olduğunda animasyonu tetikleyen Intersection Observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries, obs) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("active");
+            // bir kez oynatmak için görünen elemanı bırak
+            obs.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: 0.5,           // öğenin en az %20'si görünür olduğunda tetiklenir
+        rootMargin: "0px 0px -5% 0px", // alt tarafta hafif erken tetikleme
+      }
+    );
+
+    const els = document.querySelectorAll<HTMLElement>(".reveal");
+    els.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, [route]);
 
   // Ana sayfadaki "Öne Çıkan Portföyler" için Supabase verisi
   const [featured, setFeatured] = useState<ListingRow[]>([]);
@@ -147,12 +168,12 @@ const App: React.FC = () => {
       <Header />
       <main>
         {/* HERO */}
-        <section className="section">
+        <section className="section reveal">
           <Hero />
         </section>
 
         {/* ÖNE ÇIKAN PORTFÖYLER - Basit Izgara */}
-        <section id="ilanlar" className="section">
+        <section id="ilanlar" className="section reveal">
           <div className="container">
             <h2 className="title">Portföy</h2>
             <p className="subtitle">Seçilmiş konut ve ticari gayrimenkuller.</p>
@@ -172,7 +193,11 @@ const App: React.FC = () => {
         </section>
 
         {/* HİZMETLER */}
-        <section id="servisler" className="section" style={{ scrollMarginTop: headerOffset }}>
+        <section
+          id="servisler"
+          className="section reveal"
+          style={{ scrollMarginTop: headerOffset }}
+        >
           <div className="container about">
             <h2 className="title">Hizmetler</h2>
             <div className="services">
@@ -195,25 +220,29 @@ const App: React.FC = () => {
           </div>
         </section>
 
-      <section className="section">
-  <div className="container">
-    <h2 className="title">Danışan Yorumları</h2>
-    <div className="testimonials">
-      <div className="testimonial">
-        <p>"İlk görüşmeden satışa kadar her aşamada yanımızdaydı. Fiyatlama ve pazarlıkta profesyonelliği fark yaratıyor."</p>
-        <p className="author">— A. Yılmaz</p>
-      </div>
-      <div className="testimonial">
-        <p>"Kiracı seçimindeki titizlik ve süreç yönetimi sayesinde içim çok rahat. Teşekkürler!"</p>
-        <p className="author">— B. Aksoy</p>
-      </div>
-    </div>
-  </div>
-</section>
-
+        {/* DANIŞAN YORUMLARI */}
+        <section className="section reveal">
+          <div className="container">
+            <h2 className="title">Danışan Yorumları</h2>
+            <div className="testimonials">
+              <div className="testimonial">
+                <p>"İlk görüşmeden satışa kadar her aşamada yanımızdaydı. Fiyatlama ve pazarlıkta profesyonelliği fark yaratıyor."</p>
+                <p className="author">— A. Yılmaz</p>
+              </div>
+              <div className="testimonial">
+                <p>"Kiracı seçimindeki titizlik ve süreç yönetimi sayesinde içim çok rahat. Teşekkürler!"</p>
+                <p className="author">— B. Aksoy</p>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* İLETİŞİM */}
-        <section id="iletisim" className="section" style={{ scrollMarginTop: headerOffset }}>
+        <section
+          id="iletisim"
+          className="section reveal"
+          style={{ scrollMarginTop: headerOffset }}
+        >
           <div className="container contact">
             <div className="info">
               <h2 className="title" style={{ marginBottom: 6 }}>İletişime Geçin</h2>
@@ -240,7 +269,7 @@ const App: React.FC = () => {
       </main>
 
       {/* FOOTER */}
-      <footer>
+      <footer className="reveal">
         <div className="container foot">
           <div>
             <div className="brand" style={{ marginBottom: 8 }}>
@@ -270,11 +299,11 @@ const App: React.FC = () => {
         </div>
       </footer>
 
-      {/* Sabit Aksiyon Butonları */}
-      <div className="fab-wrap">
-        <a className="fab phone" href="tel:+905397445120" title="Hemen Ara">📞</a>
-        <a className="fab" href="https://wa.me/+905397445120" target="_blank" rel="noopener" title="WhatsApp ile yaz">💬</a>
-      </div>
+      {/* ✅ Sabit Aksiyon Butonları */}
+        <div className="fab-wrap">
+          <a className="fab phone" href="tel:+905397445120" title="Hemen Ara">📞</a>
+          <a className="fab" href="https://wa.me/+905397445120" target="_blank" rel="noopener" title="WhatsApp ile yaz">💬</a>
+        </div>
 
       <script
         type="application/ld+json"

@@ -308,3 +308,16 @@
 .fab.phone:hover {
   background: #0095e0;
 }
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 0.8s ease-out;
+}
+
+.reveal.from-left { transform: translateX(-50px); }
+.reveal.from-right { transform: translateX(50px); }
+
+.reveal.active {
+  opacity: 1;
+  transform: translateX(0) translateY(0);
+}

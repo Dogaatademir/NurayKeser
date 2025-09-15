@@ -1,7 +1,5 @@
-// src/pages/About.tsx
-import React from "react";
+import React, { useEffect } from "react";
 import Header from "../components/Header";
-import Hero from "../components/Hero"; // ✅ Eklendi
 import "./About.css";
 
 const bullets = [
@@ -11,22 +9,35 @@ const bullets = [
 ];
 
 const About: React.FC = () => {
+  useEffect(() => {
+    // App.tsx'teki gibi Intersection Observer
+    const observer = new IntersectionObserver(
+      (entries, obs) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("active");
+            obs.unobserve(entry.target); // sadece bir kere tetiklenmesi için
+          }
+        });
+      },
+      { threshold: 0.5, rootMargin: "0px 0px -5% 0px" }
+    );
+
+    const els = document.querySelectorAll<HTMLElement>(".reveal");
+    els.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <>
       <Header />
-
       <main className="page">
-        {/* HERO — App.tsx ile aynı kullanım */}
-        <section className="section">
-          <Hero />
-        </section>
-
         {/* Özgeçmiş */}
-        <section className="section about-section">
+        <section className="section about-section reveal from-bottom">
           <div className="container">
             <h2 className="title">Özgeçmiş</h2>
             <p className="subtitle">Güvene dayalı, veriye dayalı ve şeffaf danışmanlık.</p>
-
             <article className="about-card">
               <p className="about-text">
                 Gayrimenkul dünyasına adım attığım ilk günden itibaren amacım; insanlara yalnızca bir
@@ -47,11 +58,10 @@ const About: React.FC = () => {
         </section>
 
         {/* Profesyonel Yaklaşım */}
-        <section className="section about-section">
+        <section className="section about-section reveal from-right">
           <div className="container">
             <h2 className="title">Profesyonel Yaklaşım</h2>
             <p className="subtitle">Her projeye özel, şeffaf ve veri odaklı çözümler.</p>
-
             <div className="about-grid">
               <article className="about-card">
                 <h3 className="about-h3">Misyon</h3>
@@ -78,7 +88,6 @@ const About: React.FC = () => {
                 </div>
               </article>
 
-              {/* Çalışma Süreci */}
               <article className="about-card">
                 <div className="about-row">
                   <h3 className="about-h3">Çalışma Süreci</h3>
@@ -103,7 +112,7 @@ const About: React.FC = () => {
         </section>
 
         {/* Uzmanlık Alanları */}
-        <section className="section about-section">
+        <section className="section about-section reveal from-left">
           <div className="container">
             <h2 className="title">Uzmanlık Alanları</h2>
             <div className="about-services">
@@ -127,7 +136,7 @@ const About: React.FC = () => {
         </section>
 
         {/* Danışan Yorumları */}
-        <section className="section about-section">
+        <section className="section about-section reveal from-right">
           <div className="container">
             <h2 className="title">Danışan Yorumları</h2>
             <div className="about-grid">
@@ -147,14 +156,7 @@ const About: React.FC = () => {
           </div>
         </section>
 
-        {/* İletişim */}
-        <section id="iletisim" className="section about-section">
-          <div className="container contact">
-            {/* ... mevcut iletişim formu ... */}
-          </div>
-        </section>
-
-        {/* ✅ Sabit Aksiyon Butonları */}
+        {/* Sabit Aksiyon Butonları */}
         <div className="fab-wrap">
           <a className="fab phone" href="tel:+905397445120" title="Hemen Ara">📞</a>
           <a className="fab" href="https://wa.me/+905397445120" target="_blank" rel="noopener" title="WhatsApp ile yaz">💬</a>

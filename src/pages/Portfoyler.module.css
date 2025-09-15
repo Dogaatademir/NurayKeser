@@ -1,0 +1,258 @@
+/* =========================
+   Portföy – İzole (CSS Module)
+   ========================= */
+
+/* Tokenlar (sadece bu modül içinde geçerli) */
+:local(.tokens) {
+  --bg: #f6f9fb;
+  --card: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+
+  --brand: #004b8d;
+  --brand2: #0079c1;
+
+  --border: rgba(0,75,141,.18);
+  --borderStrong: rgba(0,75,141,.36);
+  --shadow: 0 8px 28px rgba(0,0,0,.12);
+
+  --radius: 18px;
+  --padY: clamp(16px, 2.6vw, 28px);
+  --padX: clamp(12px, 2.2vw, 24px);
+}
+
+/* Kök */
+:local(.page) {
+  /* App.css’den gelebilecek global kuralların etkisini minimize etmek için */
+  isolation: isolate;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: var(--padY) 0;
+  padding-top: 80px; /* fixed header payı */
+}
+
+/* Konteyner – sola hizalı, tam genişlik */
+:local(.container) {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding-inline: var(--padX);
+}
+
+/* Başlık */
+:local(.heading) {
+  font-family: "Playfair Display", ui-serif, Georgia, serif;
+  font-size: clamp(22px, 3.2vw, 32px);
+  color: var(--brand);
+  margin: 0 0 8px 0;
+}
+
+/* Grid */
+:local(.grid) {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: 1fr; /* mobil */
+  align-items: stretch;
+  justify-items: stretch;
+  justify-content: start;
+}
+
+@media (min-width: 600px) {
+  :local(.grid) {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 22px;
+  }
+}
+@media (min-width: 900px) {
+  :local(.grid) { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+}
+@media (min-width: 1200px) {
+  :local(.grid) { grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); }
+}
+
+/* Kart */
+:local(.card) {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  transition: transform .18s ease, box-shadow .22s ease, border-color .22s ease;
+}
+:local(.card):hover {
+  transform: translateY(-3px);
+  border-color: var(--borderStrong);
+  box-shadow: 0 12px 36px rgba(0,0,0,.16);
+}
+
+/* Link (tüm kart tıklanabilir) */
+:local(.link) {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  color: inherit;
+  text-decoration: none;
+  height: 100%;
+  outline: none;
+}
+:local(.link):focus-visible {
+  box-shadow: 0 0 0 3px rgba(0,121,193,.28);
+}
+
+/* Kapak */
+:local(.cover) {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: #eef2f7;
+  border-bottom: 1px solid var(--border);
+}
+:local(.cover)::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,.03), rgba(0,0,0,.12));
+  pointer-events: none;
+}
+:local(.img) {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center;
+  display: block;
+  transform: scale(1);
+  transition: transform .35s ease;
+}
+:local(.card):hover :local(.img) { transform: scale(1.035); }
+
+/* Görsel yok placeholder */
+:local(.placeholder) {
+  display: grid; place-items: center;
+  color: #94a3b8;
+  font-size: 13px;
+  letter-spacing: .2px;
+}
+
+/* Tip etiketi */
+:local(.chip) {
+  position: absolute; left: 10px; top: 10px;
+  z-index: 2;
+  font-size: 12px; line-height: 1;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background-image: linear-gradient(180deg, rgba(0,121,193,.55), rgba(0,75,141,.75));
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.28);
+  text-shadow: 0 1px 1px rgba(0,0,0,.25);
+  backdrop-filter: blur(4px);
+}
+
+/* Kart içi */
+:local(.body) {
+  display: grid;
+  gap: 8px;
+  padding: 14px 14px 16px;
+}
+:local(.title) {
+  margin: 0;
+  font-size: clamp(14px, 1.6vw, 16px);
+  font-weight: 600;
+  color: var(--text);
+  word-break: break-word;
+  text-transform: capitalize;
+}
+:local(.price) {
+  font-size: clamp(15px, 1.9vw, 18px);
+  font-weight: 800;
+  color: var(--brand2);
+}
+:local(.meta) {
+  display: flex; flex-wrap: wrap;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+:local(.meta) > span {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #fff;
+}
+
+/* Bilgi kartları (yükleniyor/boş) – inline padding yakalama */
+:local(.infoCard) {
+  text-align: left;
+  color: var(--muted);
+  padding: 24px;
+  font-size: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+/* Sayfalama */
+:local(.pager) {
+  display: flex; gap: 8px;
+  justify-content: flex-start; align-items: center;
+  margin-top: 10px;
+}
+:local(.btn) {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  border-radius: 999px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color .2s ease, border-color .2s ease, transform .08s ease, box-shadow .2s ease;
+}
+:local(.btn):hover {
+  background: rgba(0,121,193,.08);
+  border-color: var(--borderStrong);
+  box-shadow: 0 2px 0 rgba(0,0,0,.06) inset;
+}
+:local(.btn):disabled { opacity: .55; cursor: not-allowed; }
+:local(.btn):active:not(:disabled) { transform: translateY(1px); }
+:local(.btnGhost) { background: transparent; }
+
+/* FAB (sabit) */
+:local(.fabWrap) {
+  position: fixed;
+  right: 18px; bottom: 18px;
+  display: flex; flex-direction: column; gap: 10px;
+  z-index: 60;
+}
+:local(.fab) {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--brand); color: #fff;
+  box-shadow: 0 10px 24px rgba(0,0,0,.18);
+  border: 1px solid var(--border);
+  transition: transform .12s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+:local(.fab):hover {
+  transform: translateY(-2px) scale(1.03);
+  background: var(--brand2);
+  border-color: var(--borderStrong);
+  box-shadow: 0 14px 30px rgba(0,0,0,.22);
+}
+:local(.phone) { background: var(--brand2); }
+:local(.phone):hover { background: #0095e0; }
+
+/* Küçük ekran iyileştirmeleri */
+@media (max-width: 480px){
+  :local(.container){ padding-inline: 12px; }
+  :local(.body){ padding: 12px; }
+  :local(.chip){ padding: 6px 8px; font-size: 11px; }
+  :local(.btn){ padding: 8px 12px; }
+}
+
+/* Hareket azaltma */
+@media (prefers-reduced-motion: reduce){
+  :local(.card),
+  :local(.img),
+  :local(.fab) { transition: none !important; }
+}
+
+
