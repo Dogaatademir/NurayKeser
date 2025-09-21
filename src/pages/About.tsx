@@ -40,19 +40,13 @@ const About: React.FC = () => {
             <p className="subtitle">Güvene dayalı, veriye dayalı ve şeffaf danışmanlık.</p>
             <article className="about-card">
               <p className="about-text">
-                Gayrimenkul dünyasına adım attığım ilk günden itibaren amacım; insanlara yalnızca bir
-                taşınmaz değil, güven veren bir deneyim sunmak oldu. Kurumsal satış ve iletişim
-                geçmişim, pazarlık ve süreç yönetimi becerilerimi güçlendirdi. 2014’ten bu yana,
-                her portföyün bir sayıdan ibaret olmadığını; her evin ve dükkânın bir hikâyesi
-                olduğunu bilerek çalışıyorum. Bugün; konut ve ticari gayrimenkulde uçtan uca süreç
-                yönetimi, güçlü müzakere ve doğru alıcı profiline ulaşan pazarlama kampanyaları
-                üretiyorum. Bölge analizleri ve karşılaştırmalı pazar analizi (CMA) ile gerçekçi fiyat
-                konumlandırması yapıyor, resmi işlemleri titizlikle takip ediyorum. “Doğru bilgi doğru
-                zamanda paylaşıldığında güven kendiliğinden oluşur” ilkesini benimsiyor; her yeni
-                dosyada aynı özeni gösteriyorum. Bir evin anahtarını teslim etmek, bir yatırımın hedef
-                getiriyi yakalaması ya da kiralamanın sorunsuz tamamlanması… Tüm bu anlar, yaptığım işe
-                duyduğum motivasyonu her gün tazeliyor.
-              </p>
+                1971 yılında Ankara’da doğdum. Anadolu Üniversitesi Halkla İlişkiler bölümünden mezunum. 20 yıl boyunca çok uluslu ilaç firmalarında görev aldım; bunun 15 yılını satış temsilcisi, 5 yılını ise ürün müdürü olarak tamamladım. Bu süreçte iletişim, pazarlama, stratejik planlama ve insan ilişkilerinde güven inşa etme konularında değerli deneyimler kazandım.
+
+2020 yılında gayrimenkul sektörüne RE/MAX bünyesinde adım attım. 2023 yılından bu yana ise Coldwell Banker bünyesinde profesyonel gayrimenkul danışmanı olarak hizmet veriyorum.
+
+Ayrıca profesyonel fotoğraf sanatçısı kimliğim, gayrimenkul sektöründeki çalışmalarımı farklı bir bakış açısıyla zenginleştiriyor. Estetik anlayışımı, sunum ve tanıtımlarda kullanarak, danışmanlık sürecine hem görsel hem de duygusal değer katıyorum.
+
+Amacım, müşterilerime yalnızca bir gayrimenkul sunmak değil; aynı zamanda onların ihtiyaçlarına en uygun çözümü bulmak, güvenli bir süreç ve doğru yatırım fırsatları sağlamaktır. Şeffaf, çözüm odaklı ve profesyonel yaklaşımımla her müşterimin yanında olmaktan mutluluk duyuyorum. </p>
             </article>
           </div>
         </section>

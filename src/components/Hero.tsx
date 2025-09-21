@@ -29,7 +29,7 @@ const Hero: React.FC = () => {
 
         <div className="stats" aria-label="Güven göstergeleri">
           <div className="stat">
-            <div className="val">+12</div>
+            <div className="val">+5</div>
             <div className="lbl">Yıllık Deneyim</div>
           </div>
           <div className="stat">
@@ -37,7 +37,7 @@ const Hero: React.FC = () => {
             <div className="lbl">Memnuniyet</div>
           </div>
           <div className="stat">
-            <div className="val">350+</div>
+            <div className="val">200+</div>
             <div className="lbl">Başarılı İşlem</div>
           </div>
         </div>
