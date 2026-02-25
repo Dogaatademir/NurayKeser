@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  /* Kurumsal Renklerimiz */
+  --color-brand: #004b8d;
+  --color-brand-light: #0079c1;
+  --color-brand-hover: #0095e0;
+  
+  /* Kart Gölgemiz */
+  --shadow-card: 0 8px 28px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, .05);
+}
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-800 antialiased;
+  }
+}
+@layer utilities {
+  .hide-scrollbar::-webkit-scrollbar { display: none; }
+  .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
