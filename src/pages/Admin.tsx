@@ -1,22 +1,59 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabase";
+import { useNavigate } from "react-router-dom";
 
 /* =========================
    Tipler & Sabitler
 ========================= */
 type SpecKey =
-  | "İlan Tarihi" | "Emlak Tipi" | "m² (Brüt)" | "m² (Net)" | "Oda Sayısı"
-  | "Bina Yaşı" | "Bulunduğu Kat" | "Kat Sayısı" | "Isıtma" | "Banyo Sayısı"
-  | "Mutfak" | "Balkon" | "Asansör" | "Otopark" | "Eşyalı" | "Kullanım Durumu"
-  | "Site İçerisinde" | "Site Adı" | "Aidat (TL)" | "Krediye Uygun"
-  | "Tapu Durumu" | "Kimden" | "Takas";
+  | "İlan Tarihi"
+  | "Emlak Tipi"
+  | "m² (Brüt)"
+  | "m² (Net)"
+  | "Oda Sayısı"
+  | "Bina Yaşı"
+  | "Bulunduğu Kat"
+  | "Kat Sayısı"
+  | "Isıtma"
+  | "Banyo Sayısı"
+  | "Mutfak"
+  | "Balkon"
+  | "Asansör"
+  | "Otopark"
+  | "Eşyalı"
+  | "Kullanım Durumu"
+  | "Site İçerisinde"
+  | "Site Adı"
+  | "Aidat (TL)"
+  | "Krediye Uygun"
+  | "Tapu Durumu"
+  | "Kimden"
+  | "Takas";
 
 const SPEC_FIELDS: SpecKey[] = [
-  "İlan Tarihi", "Emlak Tipi", "m² (Brüt)", "m² (Net)", "Oda Sayısı",
-  "Bina Yaşı", "Bulunduğu Kat", "Kat Sayısı", "Isıtma", "Banyo Sayısı",
-  "Mutfak", "Balkon", "Asansör", "Otopark", "Eşyalı", "Kullanım Durumu",
-  "Site İçerisinde", "Site Adı", "Aidat (TL)", "Krediye Uygun",
-  "Tapu Durumu", "Kimden", "Takas",
+  "İlan Tarihi",
+  "Emlak Tipi",
+  "m² (Brüt)",
+  "m² (Net)",
+  "Oda Sayısı",
+  "Bina Yaşı",
+  "Bulunduğu Kat",
+  "Kat Sayısı",
+  "Isıtma",
+  "Banyo Sayısı",
+  "Mutfak",
+  "Balkon",
+  "Asansör",
+  "Otopark",
+  "Eşyalı",
+  "Kullanım Durumu",
+  "Site İçerisinde",
+  "Site Adı",
+  "Aidat (TL)",
+  "Krediye Uygun",
+  "Tapu Durumu",
+  "Kimden",
+  "Takas",
 ];
 
 const BUCKET = "listing-images";
@@ -42,9 +79,7 @@ type ListingRow = {
 /* =========================
    Yardımcı Fonksiyonlar
 ========================= */
-const normalizeSpaces = (s: string) =>
-  s.replace(/\u00A0/g, " ").replace(/\s+/g, " ").trim();
-
+const normalizeSpaces = (s: string) => s.replace(/\u00A0/g, " ").replace(/\s+/g, " ").trim();
 const onlyDigits = (s: string) => (s || "").replace(/[^\d]/g, "");
 
 const mkEmptyDetails = (): Record<SpecKey, string> =>
@@ -54,7 +89,6 @@ const mkEmptyDetails = (): Record<SpecKey, string> =>
   }, {} as Record<SpecKey, string>);
 
 const isBlobUrl = (url: string) => url.startsWith("blob:");
-
 const safeRevokeUrl = (url: string) => {
   if (isBlobUrl(url)) URL.revokeObjectURL(url);
 };
@@ -68,6 +102,8 @@ const extractStoragePathFromPublicUrl = (url: string) => {
 };
 
 const Admin: React.FC = () => {
+  const navigate = useNavigate();
+
   const [viewMode, setViewMode] = useState<"manage" | "create" | "edit">("manage");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [rows, setRows] = useState<ListingRow[]>([]);
@@ -88,8 +124,13 @@ const Admin: React.FC = () => {
   const [type, setType] = useState<"Satılık" | "Kiralık">("Satılık");
   const [description, setDescription] = useState("");
   const [details, setDetails] = useState<Record<SpecKey, string>>(mkEmptyDetails());
-  const [images, setImages] = useState<File[]>([]);
-  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+
+  // ✅ Edit modunda mevcut (DB/Storage) görseller
+  const [existingImages, setExistingImages] = useState<ListingImage[]>([]);
+
+  // Yeni eklenecek görseller
+  const [newImages, setNewImages] = useState<File[]>([]);
+  const [newPreviewUrls, setNewPreviewUrls] = useState<string[]>([]);
 
   useEffect(() => {
     loadListings();
@@ -97,9 +138,9 @@ const Admin: React.FC = () => {
 
   useEffect(() => {
     return () => {
-      previewUrls.forEach(safeRevokeUrl);
+      newPreviewUrls.forEach(safeRevokeUrl);
     };
-  }, [previewUrls]);
+  }, [newPreviewUrls]);
 
   const clearMessages = () => {
     setPageError("");
@@ -168,7 +209,7 @@ const Admin: React.FC = () => {
 
     const incomingFiles = Array.from(fileList);
     const validFiles: File[] = [];
-    const newPreviewUrls: string[] = [];
+    const previews: string[] = [];
 
     for (const file of incomingFiles) {
       const isImage = file.type.startsWith("image/");
@@ -178,48 +219,107 @@ const Admin: React.FC = () => {
         setPageError("Sadece görsel dosyaları yükleyebilirsiniz.");
         continue;
       }
-
       if (!isWithinLimit) {
         setPageError(`Her görsel en fazla ${MAX_FILE_SIZE_MB} MB olabilir.`);
         continue;
       }
 
       validFiles.push(file);
-      newPreviewUrls.push(URL.createObjectURL(file));
+      previews.push(URL.createObjectURL(file));
     }
 
     if (validFiles.length > 0) {
-      setImages((prev) => [...prev, ...validFiles]);
-      setPreviewUrls((prev) => [...prev, ...newPreviewUrls]);
+      setNewImages((prev) => [...prev, ...validFiles]);
+      setNewPreviewUrls((prev) => [...prev, ...previews]);
       if (!pageError) setPageSuccess("Görsel(ler) seçildi.");
     }
 
     e.target.value = "";
   };
 
-  const removeImage = (index: number) => {
+  const removeNewImage = (index: number) => {
     clearMessages();
 
-    setImages((prev) => prev.filter((_, i) => i !== index));
-    setPreviewUrls((prev) => {
+    setNewImages((prev) => prev.filter((_, i) => i !== index));
+    setNewPreviewUrls((prev) => {
       const removed = prev[index];
       if (removed) safeRevokeUrl(removed);
       return prev.filter((_, i) => i !== index);
     });
   };
 
+  // ✅ Mevcut (DB/Storage) görselleri gerçekten sil
+  const removeExistingImage = async (imageUrl: string) => {
+    clearMessages();
+    if (!editingId) return;
+
+    const ok = window.confirm("Bu görseli silmek istediğinize emin misiniz?");
+    if (!ok) return;
+
+    try {
+      // 1) Storage path çıkar
+      const path = extractStoragePathFromPublicUrl(imageUrl);
+      if (path) {
+        const { error: storageErr } = await supabase.storage.from(BUCKET).remove([path]);
+        if (storageErr) throw storageErr;
+      }
+
+      // 2) DB kaydı sil
+      const { error: dbErr } = await supabase
+        .from("listing_images")
+        .delete()
+        .eq("listing_id", editingId)
+        .eq("url", imageUrl);
+
+      if (dbErr) throw dbErr;
+
+      // 3) Local state güncelle
+      const next = existingImages.filter((img) => img.url !== imageUrl);
+
+      // 4) idx’leri yeniden sırala
+      const reindexed = next
+        .slice()
+        .sort((a, b) => (a.idx ?? 0) - (b.idx ?? 0))
+        .map((img, i) => ({ ...img, idx: i }));
+
+      setExistingImages(reindexed);
+
+      // 5) DB’de idx güncelle (tek tek)
+      // (az sayıda görsel olduğu için safe)
+      for (const img of reindexed) {
+        await supabase
+          .from("listing_images")
+          .update({ idx: img.idx })
+          .eq("listing_id", editingId)
+          .eq("url", img.url);
+      }
+
+      // 6) cover_url güncelle (silinen cover ise)
+      const newCover = reindexed[0]?.url ?? null;
+      const { error: coverErr } = await supabase
+        .from("listings")
+        .update({ cover_url: newCover })
+        .eq("id", editingId);
+      if (coverErr) throw coverErr;
+
+      setPageSuccess("Görsel silindi ve kapak görseli güncellendi.");
+      await loadListings();
+    } catch (err: any) {
+      console.error("Görsel silme hatası:", err);
+      setPageError(err?.message || "Görsel silinirken hata oluştu.");
+    }
+  };
+
   const handleDelete = async (id: string) => {
     clearMessages();
 
-    const approved = window.confirm(
-      "Bu ilanı ve tüm fotoğraflarını silmek istediğinize emin misiniz?"
-    );
+    const approved = window.confirm("Bu ilanı ve tüm fotoğraflarını silmek istediğinize emin misiniz?");
     if (!approved) return;
 
     setDeletingId(id);
 
     try {
-      // 1) İlgili görsel kayıtlarını çek
+      // 1) Görselleri çek
       const { data: imageRows, error: imageFetchError } = await supabase
         .from("listing_images")
         .select("url")
@@ -227,35 +327,23 @@ const Admin: React.FC = () => {
 
       if (imageFetchError) throw imageFetchError;
 
-      // 2) Public URL'lerden storage path çıkar
-      const pathsToDelete =
-        (imageRows || [])
-          .map((row: { url: string }) => extractStoragePathFromPublicUrl(row.url))
-          .filter(Boolean) as string[];
+      // 2) Storage path listesi
+      const pathsToDelete = (imageRows || [])
+        .map((row: { url: string }) => extractStoragePathFromPublicUrl(row.url))
+        .filter(Boolean) as string[];
 
-      // 3) Bucket'tan dosyaları sil
+      // 3) Bucket'tan sil
       if (pathsToDelete.length > 0) {
-        const { error: storageDeleteError } = await supabase.storage
-          .from(BUCKET)
-          .remove(pathsToDelete);
-
+        const { error: storageDeleteError } = await supabase.storage.from(BUCKET).remove(pathsToDelete);
         if (storageDeleteError) throw storageDeleteError;
       }
 
-      // 4) listing_images kayıtlarını sil
-      const { error: imageDeleteError } = await supabase
-        .from("listing_images")
-        .delete()
-        .eq("listing_id", id);
-
+      // 4) DB listing_images sil
+      const { error: imageDeleteError } = await supabase.from("listing_images").delete().eq("listing_id", id);
       if (imageDeleteError) throw imageDeleteError;
 
-      // 5) En son ilan kaydını sil
-      const { error: listingDeleteError } = await supabase
-        .from("listings")
-        .delete()
-        .eq("id", id);
-
+      // 5) Listings sil
+      const { error: listingDeleteError } = await supabase.from("listings").delete().eq("id", id);
       if (listingDeleteError) throw listingDeleteError;
 
       setRows((prev) => prev.filter((r) => r.id !== id));
@@ -280,7 +368,7 @@ const Admin: React.FC = () => {
 
     const price_tl = parseInt(onlyDigits(priceLine), 10) || 0;
 
-    const payload = {
+    const payload: any = {
       title: title.trim(),
       address: address.trim(),
       price_tl,
@@ -297,38 +385,36 @@ const Admin: React.FC = () => {
     try {
       let listingId = editingId;
 
+      // 1) listings insert/update
       if (viewMode === "edit" && editingId) {
-        const { error } = await supabase
-          .from("listings")
-          .update(payload)
-          .eq("id", editingId);
-
+        const { error } = await supabase.from("listings").update(payload).eq("id", editingId);
         if (error) throw error;
       } else {
-        const { data, error } = await supabase
-          .from("listings")
-          .insert(payload)
-          .select()
-          .single();
-
+        const { data, error } = await supabase.from("listings").insert(payload).select().single();
         if (error) throw error;
         listingId = data.id;
       }
 
-      if (images.length > 0 && listingId) {
-        let firstPublicUrl = "";
+      // 2) Yeni görseller upload + listing_images insert
+      if (newImages.length > 0 && listingId) {
+        const currentMaxIdx =
+          (existingImages.length > 0
+            ? Math.max(...existingImages.map((x) => x.idx ?? 0))
+            : -1) || -1;
 
-        for (let i = 0; i < images.length; i++) {
-          const file = images[i];
+        let firstPublicUrl = existingImages[0]?.url || "";
+
+        for (let i = 0; i < newImages.length; i++) {
+          const file = newImages[i];
           const fileExt = file.name.split(".").pop()?.toLowerCase() || "jpg";
-          const fileName = `${Date.now()}-${Math.random()
-            .toString(36)
-            .substring(2, 8)}.${fileExt}`;
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
           const path = `${listingId}/${fileName}`;
 
-          const { error: uploadError } = await supabase.storage
-            .from(BUCKET)
-            .upload(path, file);
+          const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, file, {
+            cacheControl: "3600",
+            upsert: false,
+            contentType: file.type || undefined,
+          });
 
           if (uploadError) throw uploadError;
 
@@ -336,19 +422,20 @@ const Admin: React.FC = () => {
             data: { publicUrl },
           } = supabase.storage.from(BUCKET).getPublicUrl(path);
 
-          if (i === 0) firstPublicUrl = publicUrl;
+          if (!firstPublicUrl) firstPublicUrl = publicUrl;
 
-          const { error: imageInsertError } = await supabase
-            .from("listing_images")
-            .insert({
-              listing_id: listingId,
-              url: publicUrl,
-              idx: i,
-            });
+          const nextIdx = currentMaxIdx + 1 + i;
+
+          const { error: imageInsertError } = await supabase.from("listing_images").insert({
+            listing_id: listingId,
+            url: publicUrl,
+            idx: nextIdx,
+          });
 
           if (imageInsertError) throw imageInsertError;
         }
 
+        // cover_url set (yoksa)
         if (firstPublicUrl) {
           const { error: coverUpdateError } = await supabase
             .from("listings")
@@ -359,12 +446,7 @@ const Admin: React.FC = () => {
         }
       }
 
-      setPageSuccess(
-        viewMode === "edit"
-          ? "İlan başarıyla güncellendi."
-          : "İlan başarıyla kaydedildi."
-      );
-
+      setPageSuccess(viewMode === "edit" ? "İlan başarıyla güncellendi." : "İlan başarıyla kaydedildi.");
       resetForm(false);
       await loadListings();
     } catch (e: any) {
@@ -391,23 +473,19 @@ const Admin: React.FC = () => {
     });
     setDetails(nextDetails);
 
-    if (item.listing_images && item.listing_images.length > 0) {
-      const sortedUrls = [...item.listing_images]
-        .sort((a, b) => (a.idx || 0) - (b.idx || 0))
-        .map((img) => img.url);
+    const ex = (item.listing_images || [])
+      .slice()
+      .sort((a, b) => (a.idx ?? 0) - (b.idx ?? 0));
 
-      setPreviewUrls((prev) => {
-        prev.forEach(safeRevokeUrl);
-        return sortedUrls;
-      });
-    } else {
-      setPreviewUrls((prev) => {
-        prev.forEach(safeRevokeUrl);
-        return [];
-      });
-    }
+    setExistingImages(ex);
 
-    setImages([]);
+    // yeni görsel state’lerini sıfırla
+    setNewImages([]);
+    setNewPreviewUrls((prev) => {
+      prev.forEach(safeRevokeUrl);
+      return [];
+    });
+
     setViewMode("edit");
   };
 
@@ -420,9 +498,11 @@ const Admin: React.FC = () => {
     setType("Satılık");
     setDescription("");
     setDetails(mkEmptyDetails());
-    setImages([]);
 
-    setPreviewUrls((prev) => {
+    setExistingImages([]);
+
+    setNewImages([]);
+    setNewPreviewUrls((prev) => {
       prev.forEach(safeRevokeUrl);
       return [];
     });
@@ -432,9 +512,12 @@ const Admin: React.FC = () => {
     setImportText("");
   };
 
-  const filteredRows = rows.filter((r) =>
-    (r.title || "").toLowerCase().includes(q.toLowerCase())
+  const filteredRows = useMemo(
+    () => rows.filter((r) => (r.title || "").toLowerCase().includes(q.toLowerCase())),
+    [rows, q]
   );
+
+  const isBusy = saving || !!deletingId;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
@@ -443,9 +526,7 @@ const Admin: React.FC = () => {
           <div className="flex items-center gap-10">
             <h2 className="text-lg font-light italic">
               Nuray Keser{" "}
-              <span className="font-bold not-italic text-[#C5A572] ml-2 text-xs uppercase tracking-widest">
-                Admin
-              </span>
+              <span className="font-bold not-italic text-[#C5A572] ml-2 text-xs uppercase tracking-widest">Admin</span>
             </h2>
 
             <nav className="flex gap-2">
@@ -455,9 +536,7 @@ const Admin: React.FC = () => {
                   setViewMode("manage");
                 }}
                 className={`px-5 py-2 text-[11px] font-bold tracking-widest uppercase transition-all ${
-                  viewMode === "manage"
-                    ? "bg-white text-[#112769]"
-                    : "text-white/60 hover:text-white"
+                  viewMode === "manage" ? "bg-white text-[#112769]" : "text-white/60 hover:text-white"
                 }`}
               >
                 Portföy
@@ -468,11 +547,15 @@ const Admin: React.FC = () => {
                   clearMessages();
                   setViewMode("create");
                   setEditingId(null);
+                  setExistingImages([]);
+                  setNewImages([]);
+                  setNewPreviewUrls((prev) => {
+                    prev.forEach(safeRevokeUrl);
+                    return [];
+                  });
                 }}
                 className={`px-5 py-2 text-[11px] font-bold tracking-widest uppercase transition-all ${
-                  viewMode === "create"
-                    ? "bg-white text-[#112769]"
-                    : "text-white/60 hover:text-white"
+                  viewMode === "create" ? "bg-white text-[#112769]" : "text-white/60 hover:text-white"
                 }`}
               >
                 Yeni Ekle
@@ -484,7 +567,7 @@ const Admin: React.FC = () => {
             onClick={async () => {
               clearMessages();
               await supabase.auth.signOut();
-              window.location.hash = "#/admin-login";
+              navigate("/admin-login", { replace: true });
             }}
             className="text-[10px] font-bold border border-white/20 px-4 py-2 hover:bg-white hover:text-[#112769] transition-all uppercase"
           >
@@ -496,16 +579,8 @@ const Admin: React.FC = () => {
       <main className="max-w-7xl mx-auto px-6 py-12">
         {(pageError || pageSuccess) && (
           <div className="mb-6">
-            {pageError && (
-              <div className="mb-3 border border-red-200 bg-red-50 text-red-700 px-4 py-3 text-sm">
-                {pageError}
-              </div>
-            )}
-            {pageSuccess && (
-              <div className="border border-emerald-200 bg-emerald-50 text-emerald-700 px-4 py-3 text-sm">
-                {pageSuccess}
-              </div>
-            )}
+            {pageError && <div className="mb-3 border border-red-200 bg-red-50 text-red-700 px-4 py-3 text-sm">{pageError}</div>}
+            {pageSuccess && <div className="border border-emerald-200 bg-emerald-50 text-emerald-700 px-4 py-3 text-sm">{pageSuccess}</div>}
           </div>
         )}
 
@@ -519,13 +594,9 @@ const Admin: React.FC = () => {
             />
 
             {listLoading ? (
-              <div className="bg-white border border-slate-100 p-8 text-sm text-slate-500">
-                İlanlar yükleniyor...
-              </div>
+              <div className="bg-white border border-slate-100 p-8 text-sm text-slate-500">İlanlar yükleniyor...</div>
             ) : filteredRows.length === 0 ? (
-              <div className="bg-white border border-slate-100 p-8 text-sm text-slate-500">
-                Eşleşen ilan bulunamadı.
-              </div>
+              <div className="bg-white border border-slate-100 p-8 text-sm text-slate-500">Eşleşen ilan bulunamadı.</div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {filteredRows.map((r) => {
@@ -548,27 +619,19 @@ const Admin: React.FC = () => {
                         {r.cover_url ? (
                           <img src={r.cover_url} className="w-full h-full object-cover" alt="" />
                         ) : r.listing_images?.[0]?.url ? (
-                          <img
-                            src={r.listing_images[0].url}
-                            className="w-full h-full object-cover"
-                            alt=""
-                          />
+                          <img src={r.listing_images[0].url} className="w-full h-full object-cover" alt="" />
                         ) : (
-                          <div className="flex h-full items-center justify-center text-xs text-gray-300 italic">
-                            Resim Yok
-                          </div>
+                          <div className="flex h-full items-center justify-center text-xs text-gray-300 italic">Resim Yok</div>
                         )}
                       </div>
 
                       <h3 className="font-medium text-[#112769] mb-4 truncate">{r.title}</h3>
-                      <div className="text-sm text-slate-400 mb-6">
-                        {r.price_tl?.toLocaleString() || 0} TL
-                      </div>
+                      <div className="text-sm text-slate-400 mb-6">{r.price_tl?.toLocaleString() || 0} TL</div>
 
                       <div className="flex gap-2">
                         <button
                           onClick={() => startEdit(r)}
-                          disabled={saving || !!deletingId}
+                          disabled={isBusy}
                           className="flex-1 py-2 text-[10px] font-bold uppercase border border-[#112769] text-[#112769] hover:bg-[#112769] hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           Düzenle
@@ -576,7 +639,7 @@ const Admin: React.FC = () => {
 
                         <button
                           onClick={() => handleDelete(r.id)}
-                          disabled={saving || !!deletingId}
+                          disabled={isBusy}
                           className="flex-1 py-2 text-[10px] font-bold uppercase border border-red-100 text-red-400 hover:bg-red-500 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {isDeleting ? "Siliniyor..." : "Sil"}
@@ -591,9 +654,7 @@ const Admin: React.FC = () => {
         ) : (
           <div className="max-w-4xl mx-auto space-y-12">
             <div className="bg-white p-8 border border-[#112769]/5 shadow-sm">
-              <h3 className="text-xs font-bold text-[#112769] uppercase tracking-widest mb-4 italic">
-                Metinden İçe Aktar
-              </h3>
+              <h3 className="text-xs font-bold text-[#112769] uppercase tracking-widest mb-4 italic">Metinden İçe Aktar</h3>
 
               <textarea
                 className="w-full h-32 p-4 bg-[#F8FAFC] border border-slate-100 outline-none focus:border-[#C5A572] text-sm font-light italic"
@@ -604,7 +665,7 @@ const Admin: React.FC = () => {
 
               <button
                 onClick={parseFromText}
-                disabled={saving || !!deletingId}
+                disabled={isBusy}
                 className="mt-4 px-6 py-3 bg-[#112769] text-white text-[10px] font-bold uppercase hover:bg-[#C5A572] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Çözümle
@@ -614,9 +675,7 @@ const Admin: React.FC = () => {
             <div className="bg-white p-10 shadow-sm border border-slate-100">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase">
-                    İlan Başlığı
-                  </label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase">İlan Başlığı</label>
                   <input
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
@@ -625,9 +684,7 @@ const Admin: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase">
-                    Fiyat (Göründüğü gibi)
-                  </label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase">Fiyat (Göründüğü gibi)</label>
                   <input
                     value={priceLine}
                     onChange={(e) => setPriceLine(e.target.value)}
@@ -638,9 +695,7 @@ const Admin: React.FC = () => {
               </div>
 
               <div className="mb-12 space-y-2">
-                <label className="text-[10px] font-bold text-slate-400 uppercase">
-                  İlan Türü
-                </label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase">İlan Türü</label>
 
                 <div className="flex gap-4">
                   {["Satılık", "Kiralık"].map((t) => (
@@ -666,12 +721,7 @@ const Admin: React.FC = () => {
                     <label className="text-[9px] font-bold text-slate-300 uppercase">{f}</label>
                     <input
                       value={details[f] || ""}
-                      onChange={(e) =>
-                        setDetails({
-                          ...details,
-                          [f]: e.target.value,
-                        })
-                      }
+                      onChange={(e) => setDetails({ ...details, [f]: e.target.value })}
                       className="w-full border-b border-slate-100 py-1 text-xs outline-none focus:border-[#C5A572]"
                     />
                   </div>
@@ -679,9 +729,7 @@ const Admin: React.FC = () => {
               </div>
 
               <div className="mb-12 space-y-2">
-                <label className="text-[10px] font-bold text-slate-400 uppercase">
-                  İlan Açıklaması
-                </label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase">İlan Açıklaması</label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -690,19 +738,36 @@ const Admin: React.FC = () => {
                 />
               </div>
 
+              {/* ✅ Görseller: mevcut + yeni */}
               <div className="mb-12">
-                <label className="text-[10px] font-bold text-slate-400 uppercase block mb-4">
-                  Görseller
-                </label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase block mb-4">Görseller</label>
 
                 <div className="flex flex-wrap gap-4">
-                  {previewUrls.map((url, i) => (
-                    <div key={i} className="relative w-24 h-24 border border-slate-200 shadow-sm">
+                  {/* Mevcut görseller */}
+                  {existingImages.map((img, i) => (
+                    <div key={`ex-${img.url}-${i}`} className="relative w-24 h-24 border border-slate-200 shadow-sm">
+                      <img src={img.url} className="w-full h-full object-cover" alt="" />
+                      <button
+                        onClick={() => removeExistingImage(img.url)}
+                        type="button"
+                        disabled={isBusy}
+                        title="Görseli sil"
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-[10px] flex items-center justify-center disabled:opacity-50"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+
+                  {/* Yeni eklenen görseller */}
+                  {newPreviewUrls.map((url, i) => (
+                    <div key={`new-${url}-${i}`} className="relative w-24 h-24 border border-slate-200 shadow-sm">
                       <img src={url} className="w-full h-full object-cover" alt="" />
                       <button
-                        onClick={() => removeImage(i)}
+                        onClick={() => removeNewImage(i)}
                         type="button"
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-[10px] flex items-center justify-center"
+                        disabled={isBusy}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-[10px] flex items-center justify-center disabled:opacity-50"
                       >
                         ×
                       </button>
@@ -711,21 +776,21 @@ const Admin: React.FC = () => {
 
                   <label className="w-24 h-24 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 cursor-pointer hover:border-[#C5A572] transition-all text-slate-400">
                     <span className="text-xl">+</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      className="hidden"
-                      onChange={handleImageSelect}
-                    />
+                    <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageSelect} />
                   </label>
                 </div>
+
+                {viewMode === "edit" && existingImages.length === 0 && (
+                  <p className="mt-4 text-xs text-slate-400">
+                    Not: Bu ilanda mevcut görsel yok. İlk eklediğin görsel otomatik kapak olarak atanır.
+                  </p>
+                )}
               </div>
 
               <div className="flex gap-4">
                 <button
                   onClick={handleSave}
-                  disabled={saving || !!deletingId}
+                  disabled={isBusy}
                   className="flex-1 bg-[#112769] text-white py-5 text-xs font-bold uppercase tracking-[0.2em] hover:bg-[#C5A572] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {saving ? "Kaydediliyor..." : "Portföyü Kaydet"}
@@ -733,7 +798,7 @@ const Admin: React.FC = () => {
 
                 <button
                   onClick={() => resetForm()}
-                  disabled={saving || !!deletingId}
+                  disabled={isBusy}
                   className="px-10 border border-slate-200 text-slate-400 text-xs font-bold uppercase hover:bg-slate-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Vazgeç
