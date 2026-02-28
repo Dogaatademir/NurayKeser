@@ -262,11 +262,7 @@ const Contact: React.FC = () => {
                 </button>
               </form>
 
-              {/* ✅ Çok net uyarı: mailto form UX olarak zayıf */}
-              <p className="mt-10 text-[12px] text-[#8B92A4] leading-relaxed">
-                Not: Bu form “mailto” ile çalışır. Kullanıcının cihazında e-posta uygulaması yoksa ya da kurulu değilse gönderim başarısız olur.
-                Teslim öncesi istersen bunu Supabase/Edge Function üzerinden gerçek form gönderimine çevirelim.
-              </p>
+             
             </div>
           </div>
         </div>
